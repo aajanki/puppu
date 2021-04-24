@@ -415,7 +415,7 @@ def _is_supistuma_verbi(forms):
     preesens_yks_1 = forms.get('preesens_yks_1', '---')
     return ((inf.endswith('ta') or inf.endswith('tä')) and
             ((preesens_yks_1[-2] == 'a') or
-             (len(preesenst_yks_1) >= 3 and preesens_yks_1[-2] in vowels and preesens_yks_1[-3] in vowels)))
+             (len(preesens_yks_1) >= 3 and preesens_yks_1[-2] in vowels and preesens_yks_1[-3] in vowels)))
 
 
 def _gradation_type(token):
