@@ -221,6 +221,8 @@ def inflect_nominal(token: str,
     # Possessive suffix
     # https://kaino.kotus.fi/visk/sisallys.php?p=95
     if person_psor:
+        if case  == 'Nom' or (case == 'Gen' and number == 'Sing'):
+            form = _vowel_stem(forms, strong=True) or form
         if number == 'Plur' and form.endswith('t'):
             form = form[:-1]
         elif case == 'Tra':
@@ -228,6 +230,8 @@ def inflect_nominal(token: str,
             form = form[:-1] + 'e'
 
         if person_psor in ['1', '2']:
+            if form.endswith('n'):
+                form = form[:-1]
             psor_key = person_psor + '_' + (number_psor or 'Sing')
             form = form + possessive_suffixes[psor_key]
         elif person_psor == '3':
@@ -301,7 +305,7 @@ def _conjugate_verb_active(token: str,
         if token == 'olla':
             root = 'lie'
         else:
-            root = _consonant_or_vowel_root(forms)
+            root = _consonant_or_vowel_stem(forms)
         if not root:
             root = token[:-2]
 
@@ -312,7 +316,6 @@ def _conjugate_verb_active(token: str,
     elif mood == 'Ind':
         # Indicative
         # https://kaino.kotus.fi/visk/sisallys.php?p=107
-        grad = _gradation_type(token)
         if tense == 'Pres' and token == 'olla':
             if person == '3':
                 root = 'on' if number == 'Sing' else 'ovat'
@@ -323,9 +326,12 @@ def _conjugate_verb_active(token: str,
         elif tense == 'Pres':
             if 'preesens_yks_1' in forms:
                 root = forms['preesens_yks_1'][:-1]
+                grad = _gradation_type(token)
                 if grad in ['av1', 'av3', 'av5'] and person == '3':
                     # Suora astevaihtelu, tarvitaan heikko vartalo
-                    root = __apply_gradation(forms['preesens_yks_1'], grad)[0][:-1]
+                    grad_tuple = __apply_gradation(forms['preesens_yks_1'], grad)
+                    if grad_tuple is not None:
+                        root = grad_tuple[0][:-1]
             else:
                 # A very crude guess for the root
                 root = token[:-1]
@@ -340,9 +346,12 @@ def _conjugate_verb_active(token: str,
         else:
             if 'imperfekti_yks_3' in forms:
                 root = forms['imperfekti_yks_3']
+                grad = _gradation_type(token)
                 if grad in ['av1', 'av3', 'av5'] and person in ['1', '2']:
                     # Suora astevaihtelu, tarvitaan vahva vartalo
-                    root = __apply_gradation(root, grad)[1]
+                    grad_tuple = __apply_gradation(root, grad)
+                    if grad_tuple:
+                        root = grad_tuple[1]
             else:
                 # A very crude guess
                 root = token[:-1]
@@ -357,7 +366,7 @@ def _conjugate_verb_active(token: str,
     vowel_type = get_wordform_infl_vowel_type(root)
     affix = replace_vowel_placeholders(affix, vowel_type)
     return root + affix
-    
+
 
 def _conjugate_verb_passive(token: str,
                             tense: Literal['Pres', 'Past'],
@@ -418,12 +427,26 @@ def _gradation_type(token):
     return None
 
 
-def _consonant_or_vowel_root(forms):
-    """Return the consonant root if it exists, otherwise the vowel root"""
+def _consonant_or_vowel_stem(forms):
+    """Return the consonant root of a verb if it exists, otherwise the vowel root"""
     # https://kaino.kotus.fi/visk/sisallys.php?p=55
 
     candidate_form = forms.get('imperatiivi_yks_3', '')[:-4]
     return candidate_form or None
+
+
+def _vowel_stem(forms, *, strong):
+    """Return the vowel stem of a nominal word.
+
+    Return the strong vowel stem is strong is True, otherwise the weak
+    vowel stem.
+    """
+    if strong and 'essiivi' in forms:
+        return forms['essiivi'][:-2]
+    elif not strong and 'genetiivi':
+        return forms['genetiivi'][:-1]
+    else:
+        return None
 
 
 def replace_vowel_placeholders(s, vowel_type):

@@ -904,6 +904,38 @@ NOUN_EXAMPLES = [
         {'token': 'keksintö', 'case': 'Par', 'number': 'Plur', 'person_psor': '3'},
         'keksintöjään'
     ),
+    (
+        {'token': 'keisarinna', 'case': 'Nom', 'number': 'Sing', 'person_psor': '1'},
+        'keisarinnani'
+    ),
+    (
+        {'token': 'keisarinna', 'case': 'Gen', 'number': 'Sing', 'person_psor': '1'},
+        'keisarinnani'
+    ),
+    (
+        {'token': 'luoto', 'case': 'Gen', 'number': 'Sing', 'person_psor': '1'},
+        'luotoni'
+    ),
+    (
+        {'token': 'luoto', 'case': 'Ade', 'number': 'Sing', 'person_psor': '1'},
+        'luodollani'
+    ),
+    (
+        {'token': 'luoto', 'case': 'Gen', 'number': 'Plur', 'person_psor': '1', 'number_psor': 'Plur'},
+        'luotojemme'
+    ),
+    (
+        {'token': 'perhe', 'case': 'Nom', 'number': 'Plur', 'person_psor': '2', 'number_psor': 'Plur'},
+        'perheenne'
+    ),
+    (
+        {'token': 'tytär', 'case': 'Nom', 'number': 'Sing', 'person_psor': '1'},
+        'tyttäreni'
+    ),
+    (
+        {'token': 'vanhempi', 'case': 'Gen', 'number': 'Plur', 'person_psor': '1', 'number_psor': 'Plur'},
+        'vanhempiemme'
+    ),
 
     # the translative marker -ksi turns into -kse in front of a possessive suffix
     (
