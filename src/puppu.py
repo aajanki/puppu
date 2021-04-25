@@ -30,7 +30,7 @@ class Grammar:
     def validate_rules(self, rules):
         known_rule_names = set(rules.keys())
         known_word_classes = ['teonsana', 'nimisana', 'laatusana', 'lukusana',
-                              'asemosana', 'seikkasana', 'välimerkki']
+                              'asemosana', 'seikkasana', 'sidesana', 'välimerkki']
         for _, rule_alternatives in rules.items():
             for rule_list in rule_alternatives:
                 for rule in rule_list:
@@ -186,6 +186,9 @@ grammar = Grammar({
     'PREDICATIVE': [
         [R('NP', case='Nom')],
         [R('AP', case='Nom')],
+        [Terminal('laatusana', case='Nom', degree='Cmp'),
+         Terminal('sidesana', 'kuin'),
+         R('N', case='Nom')],
     ],
     'VP': [
         [R('V', person='3'), Optional(R('AdvP'), 0.5)],
