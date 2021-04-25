@@ -242,6 +242,100 @@ ACTIVE_INDICATIVE_EXAMPLES = [
         {'token': 'olla', 'tense': 'Past', 'person': '3', 'number': 'Plur', 'mood': 'Ind'},
         'olivat'
     ),
+
+    # pääverbin kieltomuoto
+    (
+        {'token': 'olla', 'tense': 'Pres', 'person': '1', 'number': 'Sing', 'mood': 'Ind', 'connegative': True},
+        'ole'
+    ),
+    (
+        {'token': 'olla', 'tense': 'Pres', 'person': '2', 'number': 'Sing', 'mood': 'Ind', 'connegative': True},
+        'ole'
+    ),
+    (
+        {'token': 'olla', 'tense': 'Pres', 'person': '3', 'number': 'Sing', 'mood': 'Ind', 'connegative': True},
+        'ole'
+    ),
+    (
+        {'token': 'olla', 'tense': 'Pres', 'person': '1', 'number': 'Plur', 'mood': 'Ind', 'connegative': True},
+        'ole'
+    ),
+    (
+        {'token': 'olla', 'tense': 'Pres', 'person': '2', 'number': 'Plur', 'mood': 'Ind', 'connegative': True},
+        'ole'
+    ),
+    (
+        {'token': 'olla', 'tense': 'Pres', 'person': '3', 'number': 'Plur', 'mood': 'Ind', 'connegative': True},
+        'ole'
+    ),
+    (
+        {'token': 'olla', 'tense': 'Past', 'person': '1', 'number': 'Sing', 'mood': 'Ind', 'connegative': True},
+        'ollut'
+    ),
+    (
+        {'token': 'kävellä', 'tense': 'Pres', 'person': '1', 'number': 'Sing', 'mood': 'Ind', 'connegative': True},
+        'kävele'
+    ),
+    (
+        {'token': 'kävellä', 'tense': 'Pres', 'person': '2', 'number': 'Sing', 'mood': 'Ind', 'connegative': True},
+        'kävele'
+    ),
+    (
+        {'token': 'kävellä', 'tense': 'Pres', 'person': '3', 'number': 'Sing', 'mood': 'Ind', 'connegative': True},
+        'kävele'
+    ),
+    (
+        {'token': 'kävellä', 'tense': 'Pres', 'person': '1', 'number': 'Plur', 'mood': 'Ind', 'connegative': True},
+        'kävele'
+    ),
+    (
+        {'token': 'kävellä', 'tense': 'Pres', 'person': '2', 'number': 'Plur', 'mood': 'Ind', 'connegative': True},
+        'kävele'
+    ),
+    (
+        {'token': 'kävellä', 'tense': 'Pres', 'person': '3', 'number': 'Plur', 'mood': 'Ind', 'connegative': True},
+        'kävele'
+    ),
+    (
+        {'token': 'kävellä', 'tense': 'Pres', 'person': '2', 'number': 'Sing', 'mood': 'Cnd', 'connegative': True},
+        'kävelisi'
+    ),
+    (
+        {'token': 'kävellä', 'tense': 'Pres', 'person': '2', 'number': 'Sing', 'mood': 'Imp', 'connegative': True},
+        'kävele'
+    ),
+    (
+        {'token': 'kävellä', 'tense': 'Past', 'person': '2', 'number': 'Sing', 'mood': 'Ind', 'connegative': True},
+        'kävellyt'
+    ),
+    (
+        {'token': 'kävellä', 'tense': 'Past', 'person': '2', 'number': 'Plur', 'mood': 'Ind', 'connegative': True},
+        'kävelleet'
+    ),
+    (
+        {'token': 'kävellä', 'tense': 'Past', 'person': '2', 'number': 'Sing', 'mood': 'Cnd', 'connegative': True},
+        'kävelisi'
+    ),
+    (
+        {'token': 'olla', 'tense': 'Pres', 'person': '4', 'number': 'Sing', 'mood': 'Ind', 'connegative': True},
+        'olla'
+    ),
+    (
+        {'token': 'kävellä', 'tense': 'Pres', 'person': '4', 'number': 'Sing', 'mood': 'Ind', 'connegative': True},
+        'kävellä'
+    ),
+    (
+        {'token': 'hautoa', 'tense': 'Pres', 'person': '4', 'number': 'Sing', 'mood': 'Ind', 'connegative': True},
+        'haudota'
+    ),
+    (
+        {'token': 'syödä', 'tense': 'Pres', 'person': '4', 'number': 'Sing', 'mood': 'Ind', 'connegative': True},
+        'syödä'
+    ),
+    (
+        {'token': 'kertoa', 'tense': 'Pres', 'person': '4', 'number': 'Sing', 'mood': 'Imp', 'connegative': True},
+        'kerrottako'
+    ),
 ]
 
 ACTIVE_CONDITIONAL_EXAMPLES = [
@@ -1403,6 +1497,6 @@ def test_inflect_not_implemented_noun(inflection, expected):
 
 
 @pytest.mark.xfail
-@pytest.mark.parametrize("inflection,expected", NOT_YET_IMPLEMENTED_NOUN_EXAMPLES)
+@pytest.mark.parametrize("inflection,expected", NOT_YET_IMPLEMENTED_PRONOUN_EXAMPLES)
 def test_inflect_not_implemented_pronoun(inflection, expected):
     assert inflect_pronoun(**inflection) == expected

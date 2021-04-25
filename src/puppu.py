@@ -97,7 +97,8 @@ class Grammar:
                 tense=attributes.get('tense', 'Pres'),
                 person=attributes.get('person', '1'),
                 number=attributes.get('number', 'Sing'),
-                mood=attributes.get('mood', 'Ind'))
+                mood=attributes.get('mood', 'Ind'),
+                connegative=attributes.get('connegative', False))
         elif word_class in ['laatusana', 'lukusana', 'nimisana']:
             return inflect_nominal(
                 lexeme,
@@ -146,6 +147,7 @@ class Optional:
         self.rule = rule
         self.p = p
 
+
 R = Rule
 grammar = Grammar({
     'SENTENCE': [
@@ -188,6 +190,11 @@ grammar = Grammar({
     'VP': [
         [R('V', person='3'), Optional(R('AdvP'), 0.5)],
         [R('V', person='3'), R('OBJECTIVE'), Optional(R('AdvP'), 0.2)],
+
+        [Terminal('teonsana', 'ei', person='3'),
+         Optional(Terminal('seikkasana', ['koskaan', 'kuitenkaan', 'aina', 'onneksi', 'ehkä', 'enää']), 0.2),
+         R('V', person='3', connegative=True),
+         Optional(R('AdvP'), 0.2)],
 
         # predicative
         [Terminal('teonsana', 'olla', person='3'), R('PREDICATIVE')],

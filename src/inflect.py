@@ -2,7 +2,7 @@ import re
 from typing import Literal, Optional
 from voikko.inflect_word import inflect_word, WORD_CLASSES
 from voikko.voikkoinfl import __apply_gradation
-from voikko.voikkoutils import VOWEL_BACK, VOWEL_FRONT, get_wordform_infl_vowel_type
+from voikko.voikkoutils import VOWEL_BACK, get_wordform_infl_vowel_type
 
 vowels = 'aeiouyäöå'
 case_affixes = {
@@ -69,7 +69,7 @@ possessive_suffixes = {
     '2_Plur': 'nne',
     # See the code for the third person possessive
 }
-pronoun_roots = {
+pronoun_stems = {
     'minä_Sing': 'minu',
     'minä_Plur': 'mei',
     'sinä_Sing': 'sinu',
@@ -141,17 +141,52 @@ pronoun_exceptions = {
     'mikä_Plur_Gen': 'minkä',
     'mikä_Plur_Par': 'mitä',
 }
+ei_conjugation = {
+    '1_Sing_Ind': 'en',
+    '2_Sing_Ind': 'et',
+    '3_Sing_Ind': 'ei',
+    '4_Sing_Ind': 'ei',
+    '1_Plur_Ind': 'emme',
+    '2_Plur_Ind': 'ette',
+    '3_Plur_Ind': 'eivät',
+    '4_Plur_Ind': 'ei',
+    '1_Sing_Imp': '', # not used
+    '2_Sing_Imp': 'älä',
+    '3_Sing_Imp': 'älköön',
+    '4_Sing_Imp': 'älköön',
+    '1_Plur_Imp': 'alkäämme',
+    '2_Plur_Imp': 'älkää',
+    '3_Plur_Imp': 'älkööt',
+    '4_Plur_Imp': 'älköön',
+}
 
 def conjugate_verb(token: str,
                    *,
                    tense: Literal['Pres', 'Past'],
                    person: Literal['1', '2', '3', '4'],
                    number: Literal['Sing', 'Plur'],
-                   mood: Literal['Ind', 'Cnd', 'Imp', 'Pot']) -> str:
-    if person == '4':
+                   mood: Literal['Ind', 'Cnd', 'Imp', 'Pot'],
+                   connegative: bool=False) -> str:
+    if token == 'ei':
+        return _conjugate_negation_verb(person, number, mood)
+
+    elif connegative:
+        return _conjugate_verb_connegative(token, tense, person, mood, number)
+
+    elif person == '4':
         return _conjugate_verb_passive(token, tense, number, mood)
-    else:
-        return _conjugate_verb_active(token, tense, person, number, mood)
+
+    elif mood == 'Cnd':
+        return _conjugate_verb_conditional(token, person, number)
+
+    elif mood == 'Imp':
+        return _conjugate_verb_imperative(token, person, number)
+
+    elif mood == 'Pot':
+        return _conjugate_verb_potential(token, person, number)
+
+    else: # mood == 'Ind'
+        return _conjugate_verb_indicative(token, tense, person, number)
 
 
 def inflect_nominal(token: str,
@@ -248,9 +283,7 @@ def inflect_nominal(token: str,
             else:
                 suffix = 'nsA'
 
-            vowel_type = get_wordform_infl_vowel_type(form)
-            suffix = replace_vowel_placeholders(suffix, vowel_type)
-            form = form + suffix
+            form = _append_affix_with_vowel_harmony(form, suffix)
 
     return form
 
@@ -266,116 +299,16 @@ def inflect_pronoun(token: str,
     if key_case in pronoun_exceptions:
         return pronoun_exceptions[key_case]
 
-    root = pronoun_roots.get(key, token)
-    vowel_type = VOWEL_BACK if any(x in root for x in 'aou') else VOWEL_FRONT
+    stem = pronoun_stems.get(key, token)
     affix = case_affixes.get(case, '')
-    affix = replace_vowel_placeholders(affix, vowel_type)
-    return root + affix
-
-
-def _conjugate_verb_active(token: str,
-                           tense: Literal['Pres', 'Past'],
-                           person: Literal['1', '2', '3'],
-                           number: Literal['Sing', 'Plur'],
-                           mood: Literal['Ind', 'Cnd', 'Imp', 'Pot']) -> str:
-    forms = inflect_word(token, required_wclass='verbi')
-
-    # TODO: kieltomuoto
-
-    if mood == 'Cnd':
-        # Conditional
-        # https://kaino.kotus.fi/visk/sisallys.php?p=116
-        root = forms.get('kondit_yks_3', token)
-        affix = verb_person_number_affix[person + '_' + number]
-
-    elif mood == 'Imp':
-        # Imperative
-        # https://kaino.kotus.fi/visk/sisallys.php?p=118
-        if person == '2' and number == 'Sing':
-            if 'preesens_yks_1' in forms:
-                root = forms['preesens_yks_1'][:-1]
-            else:
-                root = token[:-2] + 'e'
-        else:
-            if 'imperatiivi_yks_3' in forms:
-                root = forms['imperatiivi_yks_3'][:-4]
-            else:
-                root = token[:-2]
-        affix = verb_imperative_person_number_affix[person + '_' + number]
-
-    elif mood == 'Pot':
-        # Potential
-        # https://kaino.kotus.fi/visk/sisallys.php?p=117
-        if token == 'olla':
-            root = 'lie'
-        else:
-            root = _consonant_or_vowel_stem(forms)
-        if not root:
-            root = token[:-2]
-
-        affix = verb_potential_person_number_affix[person + '_' + number]
-        if root[-1] in 'lrs':
-            affix = root[-1] + affix[1:]
-
-    elif mood == 'Ind':
-        # Indicative
-        # https://kaino.kotus.fi/visk/sisallys.php?p=107
-        if tense == 'Pres' and token == 'olla':
-            if person == '3':
-                root = 'on' if number == 'Sing' else 'ovat'
-                affix = ''
-            else:
-                root = forms['preesens_yks_1'][:-1]
-                affix = verb_person_number_affix[person + '_' + number]
-        elif tense == 'Pres':
-            if 'preesens_yks_1' in forms:
-                root = forms['preesens_yks_1'][:-1]
-                grad = _gradation_type(token)
-                if grad in ['av1', 'av3', 'av5'] and person == '3':
-                    # Suora astevaihtelu, tarvitaan heikko vartalo
-                    grad_tuple = __apply_gradation(forms['preesens_yks_1'], grad)
-                    if grad_tuple is not None:
-                        root = grad_tuple[0][:-1]
-            else:
-                # A very crude guess for the root
-                root = token[:-1]
-                while root and root[-1] not in vowels:
-                    root = root[:-1]
-
-            if (person == '3' and number == 'Sing' and
-                ((root[-2] not in vowels and root[-1] in vowels) or _is_supistuma_verbi(forms))):
-                affix = root[-1]
-            else:
-                affix = verb_person_number_affix[person + '_' + number]
-        else:
-            if 'imperfekti_yks_3' in forms:
-                root = forms['imperfekti_yks_3']
-                grad = _gradation_type(token)
-                if grad in ['av1', 'av3', 'av5'] and person in ['1', '2']:
-                    # Suora astevaihtelu, tarvitaan vahva vartalo
-                    grad_tuple = __apply_gradation(root, grad)
-                    if grad_tuple:
-                        root = grad_tuple[1]
-            else:
-                # A very crude guess
-                root = token[:-1]
-                if root and root[-1] != 'i' and root[-1] in vowels:
-                    root = root + 'si'
-
-            affix = verb_person_number_affix[person + '_' + number]
-    else:
-        # Should not be reached
-        return token
-
-    vowel_type = get_wordform_infl_vowel_type(root)
-    affix = replace_vowel_placeholders(affix, vowel_type)
-    return root + affix
+    return _append_affix_with_vowel_harmony(stem, affix)
 
 
 def _conjugate_verb_passive(token: str,
                             tense: Literal['Pres', 'Past'],
                             number: Literal['Sing', 'Plur'],
-                            mood: Literal['Ind', 'Cnd', 'Imp', 'Pot']) -> str:
+                            mood: Literal['Ind', 'Cnd', 'Imp', 'Pot'],
+                            include_person_affix: bool = True) -> str:
     # https://kaino.kotus.fi/visk/sisallys.php?p=110
 
     forms = inflect_word(token, required_wclass='verbi')
@@ -394,22 +327,164 @@ def _conjugate_verb_passive(token: str,
         affix = 'tAkO'
     elif tense == 'Past':
         affix = 'ti'
-    elif root[-2] in vowels and root[-1] in vowels:
+    elif len(root) >= 2 and root[-2] in vowels and root[-1] in vowels:
         affix = 'dA'
-    elif root[-1] in 'lrn':
+    elif root and root[-1] in 'lrn':
         affix = root[-1] + 'A'
-    elif root[-1] == 't':
+    elif root and root[-1] == 't':
         affix = 'A'
     else: # root[-1] in vowels or root[-1] == 's':
         affix = 'tA'
 
-    person_affix = affix[-1] + 'n'
-    affix = affix + person_affix
+    if include_person_affix:
+        person_affix = affix[-1] + 'n'
+        affix = affix + person_affix
 
-    vowel_type = get_wordform_infl_vowel_type(root)
-    affix = replace_vowel_placeholders(affix, vowel_type)
-    
-    return root + affix
+    return _append_affix_with_vowel_harmony(root, affix)
+
+
+def _conjugate_verb_indicative(token, tense, person, number):
+    # https://kaino.kotus.fi/visk/sisallys.php?p=107
+    forms = inflect_word(token, required_wclass='verbi')
+    if tense == 'Pres' and token == 'olla':
+        if person == '3':
+            stem = 'on' if number == 'Sing' else 'ovat'
+            affix = ''
+        else:
+            stem = forms['preesens_yks_1'][:-1]
+            affix = verb_person_number_affix[person + '_' + number]
+    elif tense == 'Pres':
+        if 'preesens_yks_1' in forms:
+            stem = forms['preesens_yks_1'][:-1]
+            grad = _gradation_type(token)
+            if grad in ['av1', 'av3', 'av5'] and person == '3':
+                # Suora astevaihtelu, tarvitaan heikko vartalo
+                grad_tuple = __apply_gradation(forms['preesens_yks_1'], grad)
+                if grad_tuple is not None:
+                    stem = grad_tuple[0][:-1]
+        else:
+            # A very crude guess for the stem
+            stem = token[:-1]
+            while stem and stem[-1] not in vowels:
+                stem = stem[:-1]
+
+        if (person == '3' and number == 'Sing' and
+            ((len(stem) >= 2 and stem[-2] not in vowels and stem[-1] in vowels) or
+             _is_supistuma_verbi(forms))):
+            affix = stem[-1]
+        else:
+            affix = verb_person_number_affix[person + '_' + number]
+    else:
+        if 'imperfekti_yks_3' in forms:
+            stem = forms['imperfekti_yks_3']
+            grad = _gradation_type(token)
+            if grad in ['av1', 'av3', 'av5'] and person in ['1', '2']:
+                # Suora astevaihtelu, tarvitaan vahva vartalo
+                grad_tuple = __apply_gradation(stem, grad)
+                if grad_tuple:
+                    stem = grad_tuple[1]
+        else:
+            # A very crude guess
+            stem = token[:-1]
+            if stem and stem[-1] != 'i' and stem[-1] in vowels:
+                stem = stem + 'si'
+
+        affix = verb_person_number_affix[person + '_' + number]
+
+    return _append_affix_with_vowel_harmony(stem, affix)
+
+
+def _conjugate_negation_verb(person, number, mood):
+    if mood != 'Imp':
+        mood = 'Ind'
+
+    return ei_conjugation[f'{person}_{number}_{mood}']
+
+
+def _conjugate_verb_connegative(token, tense, person, mood, number):
+    # pääverbin kieltomuoto
+    # https://kaino.kotus.fi/visk/sisallys.php?p=109
+    if mood == 'Cnd':
+        forms = inflect_word(token, required_wclass='verbi')
+        return forms.get('kondit_yks_3', token)
+
+    elif mood == 'Imp':
+        # Note: imperative first person singular should never occur
+        forms = inflect_word(token, required_wclass='verbi')
+        if person in ('1', '2') and number == 'Sing':
+            form = forms.get('preesens_yks_1')
+            return form[:-1] if forms else token
+        elif person == '3' or (person in ('1', '2') and number == 'Plur'):
+            if 'imperatiivi_yks_3' in forms:
+                stem = forms['imperatiivi_yks_3'][:-4]
+            else:
+                stem = token[:-2]
+            return _append_affix_with_vowel_harmony(stem, 'kO')
+        else: # person == '4'
+            return _conjugate_verb_passive(token, tense, number, 'Imp', include_person_affix = False)
+
+    elif mood == 'Pot':
+        return _conjugate_verb_potential(token, person, number)
+
+    else: # mood == 'Ind'
+        forms = inflect_word(token, required_wclass='verbi')
+        if person == '4':
+            return _conjugate_verb_passive(token, tense, number, 'Ind', include_person_affix = False)
+        elif tense == 'Pres': # and person in ('1', '2', '3')
+            form = forms.get('preesens_yks_1')
+            return form[:-1] if form else token
+        else: # tense == 'Past'
+            if 'partisiippi_2' not in forms:
+                return token
+
+            if number == 'Sing':
+                return forms['partisiippi_2']
+            else: # number == 'Plur'
+                return forms['partisiippi_2'][:-2] + 'eet'
+
+    # should not be reached
+    return token
+
+
+def _conjugate_verb_conditional(token, person, number):
+    # https://kaino.kotus.fi/visk/sisallys.php?p=116
+    forms = inflect_word(token, required_wclass='verbi')
+    stem = forms.get('kondit_yks_3', token)
+    affix = verb_person_number_affix[person + '_' + number]
+    return _append_affix_with_vowel_harmony(stem, affix)
+
+
+def _conjugate_verb_imperative(token, person, number):
+    # https://kaino.kotus.fi/visk/sisallys.php?p=118
+    forms = inflect_word(token, required_wclass='verbi')
+    if person == '2' and number == 'Sing':
+        if 'preesens_yks_1' in forms:
+            stem = forms['preesens_yks_1'][:-1]
+        else:
+            stem = token[:-2] + 'e'
+    else:
+        if 'imperatiivi_yks_3' in forms:
+            stem = forms['imperatiivi_yks_3'][:-4]
+        else:
+            stem = token[:-2]
+    affix = verb_imperative_person_number_affix[person + '_' + number]
+    return _append_affix_with_vowel_harmony(stem, affix)
+
+
+def _conjugate_verb_potential(token, person, number):
+    # https://kaino.kotus.fi/visk/sisallys.php?p=117
+    if token == 'olla':
+        stem = 'lie'
+    else:
+        forms = inflect_word(token, required_wclass='verbi')
+        stem = _consonant_or_vowel_stem(forms)
+    if not stem:
+        stem = token[:-2]
+
+    affix = verb_potential_person_number_affix[person + '_' + number]
+    if stem and stem[-1] in 'lrs':
+        affix = stem[-1] + affix[1:]
+    return _append_affix_with_vowel_harmony(stem, affix)
 
 
 def _is_supistuma_verbi(forms):
@@ -451,6 +526,13 @@ def _vowel_stem(forms, *, strong):
         return forms['genetiivi'][:-1]
     else:
         return None
+
+
+def _append_affix_with_vowel_harmony(stem, affix):
+    """Append affix to stem and replace vowel placeholders (AOU) in the affix."""
+    vowel_type = get_wordform_infl_vowel_type(stem)
+    affix = replace_vowel_placeholders(affix, vowel_type)
+    return stem + affix
 
 
 def replace_vowel_placeholders(s, vowel_type):
