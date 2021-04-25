@@ -21,10 +21,29 @@ class Vocabulary:
 
 class Grammar:
     def __init__(self, rules):
+        self.validate_rules(rules)
         self.rules = rules
 
     def get(self, key):
         return self.rules.get(key)
+
+    def validate_rules(self, rules):
+        known_rule_names = set(rules.keys())
+        known_word_classes = ['teonsana', 'nimisana', 'laatusana', 'lukusana',
+                              'asemosana', 'seikkasana', 'välimerkki']
+        for _, rule_alternatives in rules.items():
+            for rule_list in rule_alternatives:
+                for rule in rule_list:
+                    if isinstance(rule, Optional):
+                        rule = rule.rule
+
+                    if isinstance(rule, Rule):
+                        if rule.name not in known_rule_names:
+                            raise ValueError(f'Reference to unknown rule: {rule.name}')
+
+                    if isinstance(rule, Terminal):
+                        if rule.word_class not in known_word_classes:
+                            raise ValueError(f'Unknown word class: {rule.word_class}')
 
     def generate(self, rule_name, vocabulary):
         attributes = {
@@ -64,11 +83,7 @@ class Grammar:
             if isinstance(rule, Rule):
                 generated.extend(self._generate_recursive(rule.name, vocabulary, attributes2))
             elif isinstance(rule, Terminal):
-                if rule.lexeme:
-                    lexeme = rule.lexeme
-                else:
-                    lexeme = vocabulary.random_word(rule.word_class)
-                inflected = self._inflect(lexeme, rule.word_class, attributes2)
+                inflected = self._inflect(rule.get_lexeme(vocabulary), rule.word_class, attributes2)
                 generated.append(inflected)
             else:
                 raise ValueError(f'Unknown rule: {rule}')
@@ -112,25 +127,32 @@ class Terminal:
         self.lexeme = lexeme
         self.attributes = kwargs
 
+    def get_lexeme(self, vocabulary):
+        if isinstance(self.lexeme, str):
+            return self.lexeme
+        elif self.lexeme is not None:
+            return random.choice(self.lexeme)
+        else:
+            return vocabulary.random_word(self.word_class)
+
+
+class Punct(Terminal):
+    def __init__(self, punctuation_character):
+        super().__init__('välimerkki', punctuation_character)
+
 
 class Optional:
     def __init__(self, rule, p=0.5):
         self.rule = rule
         self.p = p
-        
 
 R = Rule
-Comma = Terminal('välimerkki', ',')
 grammar = Grammar({
     'SENTENCE': [
-        [R('NP'), R('V', person='3'), Optional(R('AdvP'), 0.5)],
-        [R('NP'), R('V', person='3'), R('OBJECTIVE'), Optional(R('AdvP'), 0.2)],
-
-        # predicative
-        [R('NP'), Terminal('teonsana', 'olla', person='3'), R('PREDICATIVE')],
+        [R('NP'), R('VP')],
 
         # passive
-        [R('V', person='4'), Optional(R('AdvP'), 0.2)],
+        [R('V', person='4'), Optional(R('AdvP'), 0.2), Optional(Punct('!'))],
         [R('NP', case='Ine'), R('V', person='4'), Optional(R('AdvP'), 0.2)],
 
         # conditional
@@ -138,6 +160,14 @@ grammar = Grammar({
          R('V', person='3', mood='Cnd'),
          R('OBJECTIVE'),
          Optional(R('AdvP'), 0.2)],
+
+        # subordinate clause
+        [R('SENTENCE'),
+         Punct(','),
+         Terminal('asemosana', ['että', 'jotta', 'koska', 'kun', 'jos', 'vaikka',
+                                'kunnes', 'mikäli', 'eli', 'ja', 'mutta', 'tai']),
+         R('SENTENCE'),
+         Punct(',')],
     ],
     'OBJECTIVE': [
         [R('NP', case='Gen')],
@@ -149,6 +179,13 @@ grammar = Grammar({
     'PREDICATIVE': [
         [R('NP', case='Nom')],
         [R('AP', case='Nom')],
+    ],
+    'VP': [
+        [R('V', person='3'), Optional(R('AdvP'), 0.5)],
+        [R('V', person='3'), R('OBJECTIVE'), Optional(R('AdvP'), 0.2)],
+
+        # predicative
+        [Terminal('teonsana', 'olla', person='3'), R('PREDICATIVE')],
     ],
     'NP': [
         [R('N')],
@@ -167,11 +204,10 @@ grammar = Grammar({
          Optional(R('AP')),
          R('N', person_psor='2', number_psor='Plur')],
         [R('NP'),
-         Comma,
-         Terminal('asemosana', 'joka'),
-         Terminal('teonsana', 'olla', person='3'),
-         R('PREDICATIVE'),
-         Comma]
+         Punct(','),
+         Terminal('asemosana', ['joka', 'mikä']),
+         R('VP'),
+         Punct(',')]
     ],
     'AP': [
         [Terminal('laatusana')],
