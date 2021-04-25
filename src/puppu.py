@@ -149,7 +149,9 @@ class Optional:
 R = Rule
 grammar = Grammar({
     'SENTENCE': [
+        # declarative sentence
         [R('NP'), R('VP')],
+        [R('NP'), R('VP')], # Repeated to make this clause type more common
 
         # passive
         [R('V', person='4'), Optional(R('AdvP'), 0.2), Optional(Punct('!'))],
