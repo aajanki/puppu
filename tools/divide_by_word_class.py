@@ -5,12 +5,11 @@ from voikko import libvoikko
 
 voikko = libvoikko.Voikko("fi")
 
-ignored_pos = {'kieltosana', 'huudahdussana', 'lyhenne', 'asemosana', 'sidesana', 'etuliite'}
+ignored_pos = {'kieltosana', 'huudahdussana', 'lyhenne', 'asemosana', 'sidesana', 'etuliite', 'etunimi'}
 simplify_pos = {
     'nimisana_laatusana': 'laatusana',
     'nimi': 'nimisana',
     'paikannimi': 'nimisana',
-    'etunimi': 'nimisana',
     'sukunimi': 'nimisana',
 }
 lexemes_by_pos = {
@@ -25,7 +24,7 @@ lexemes_by_pos = {
 def main():
     infile = 'data/finnish_vocab/finnish_vocab.txt.gz'
     with gzip.open(infile, 'rt', encoding='utf-8') as f:
-        for line in islice(f, 100000):
+        for line in islice(f, 1000000):
             token = line.strip().rsplit(' ', 1)[-1]
             analyses = analyze(token)
             for analysis in analyses:
