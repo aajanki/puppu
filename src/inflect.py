@@ -136,8 +136,10 @@ pronoun_exceptions = {
     'kuka_Plur_Gen': 'keiden',
     'mikä_Sing_Nom': 'mikä',
     'mikä_Sing_Gen': 'minkä',
+    'mikä_Sing_Par': 'mitä',
     'mikä_Plur_Nom': 'mitkä',
     'mikä_Plur_Gen': 'minkä',
+    'mikä_Plur_Par': 'mitä',
 }
 
 def conjugate_verb(token: str,

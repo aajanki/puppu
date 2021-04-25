@@ -168,6 +168,9 @@ grammar = Grammar({
                                 'kunnes', 'mikäli', 'eli', 'ja', 'mutta', 'tai']),
          R('SENTENCE'),
          Punct(',')],
+
+        # interrogative clause
+        [Terminal('asemosana', ['mikä', 'kuka']), R('VP'), Punct('?')],
     ],
     'OBJECTIVE': [
         [R('NP', case='Gen')],
