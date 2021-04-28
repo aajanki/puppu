@@ -23,19 +23,29 @@ lexemes_by_pos = {
 
 def main():
     infile = 'data/finnish_vocab/finnish_vocab.txt.gz'
+    words = []
+    frequencies = {}
     with gzip.open(infile, 'rt', encoding='utf-8') as f:
-        for line in islice(f, 1000000):
-            token = line.strip().rsplit(' ', 1)[-1]
+        for line in f:
+            freq, token = line.strip().rsplit(' ', 1)
+            words.append(token)
+            frequencies[token] = int(freq)
+
+        for token in islice(words, 1000000):
+            token = token.strip('-').strip(';').strip('"')
             analyses = analyze(token)
+            if len(analyses) > 1:
+                analyses = [x for x in analyses if x['BASEFORM'] in frequencies] or analyses
+
             for analysis in analyses:
                 sanaluokka = analysis.get('CLASS')
                 baseform = analysis.get('BASEFORM')
                 sanaluokka = simplify_pos.get(sanaluokka, sanaluokka)
                 if baseform and sanaluokka and sanaluokka not in ignored_pos:
-                    baseform = baseform.strip('-')
                     lexemes_by_pos[sanaluokka].add(baseform)
 
     outpath = Path('data/vocab')
+    outpath.mkdir(parents=True)
     print(f'Writing vocabulary files to {outpath}')
     for pos, lexemes in lexemes_by_pos.items():
         with open(outpath / (pos + '.txt'), 'w', encoding='utf-8') as outf:
