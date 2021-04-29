@@ -217,10 +217,12 @@ def inflect_nominal(token: str,
         else:
             root = forms['genetiivi'][:-1]
             if degree == 'Cmp':
-                if root[-1] in 'aä':
+                if _has_two_syllables_inaccurate(token) and root[-1] in 'aä':
                     root = root[:-1] + 'e'
             else: # degree == 'Sup'
-                if len(root) >= 2 and root[-2] not in vowels and root[-1] in 'aeä':
+                if token in ('uusi', 'täysi', 'tosi'):
+                    root = token[:-1]
+                elif len(root) >= 2 and root[-2] not in vowels and root[-1] in 'aeä':
                     root = root[:-1]
                 elif len(root) >= 2 and root[-2] in vowels and root[-1] in vowels:
                     root = root[:-1]
@@ -533,6 +535,20 @@ def _append_affix_with_vowel_harmony(stem, affix):
     vowel_type = get_wordform_infl_vowel_type(stem)
     affix = replace_vowel_placeholders(affix, vowel_type)
     return stem + affix
+
+
+def _has_two_syllables_inaccurate(word):
+    """Does the word have two syllables?
+
+    Inaccurate: misdetects some of the less common syllable types."""
+    # the most syllables include CV, VV, or VC
+    syllable_elements = [
+        '[bcdfghjklmnpqrstvwxz][aeiouyäö]',
+        'aa|ee|ii|oo|uu|yy|ää|öö|ai|ei|oi|ui|yi|äi|öi|au|eu|iu|ou|äy|öy|iy|ey|ie|uo|yö',
+        '[aeiouyäö][bcdfghjklmnpqrstvwxz]',
+    ]
+    x = sum(1 for _ in re.finditer('|'.join(syllable_elements), word, re.IGNORECASE))
+    return x <= 2
 
 
 def replace_vowel_placeholders(s, vowel_type):

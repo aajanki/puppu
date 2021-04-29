@@ -1207,6 +1207,14 @@ ADJECTIVE_EXAMPLES = [
         'vanhempi'
     ),
     (
+        {'token': 'myyvä', 'case': 'Nom', 'number': 'Sing', 'degree': 'Cmp'},
+        'myyvempi'
+    ),
+    (
+        {'token': 'myyvä', 'case': 'Nom', 'number': 'Sing', 'degree': 'Sup'},
+        'myyvin'
+    ),
+    (
         {'token': 'matala', 'case': 'Nom', 'number': 'Sing', 'degree': 'Sup'},
         'matalin'
     ),
@@ -1221,6 +1229,46 @@ ADJECTIVE_EXAMPLES = [
     (
         {'token': 'falski', 'case': 'Nom', 'number': 'Sing', 'degree': 'Sup'},
         'falskein'
+    ),
+    (
+        {'token': 'seikkaileva', 'case': 'Nom', 'number': 'Sing', 'degree': 'Cmp'},
+        'seikkailevampi'
+    ),
+    (
+        {'token': 'seikkaileva', 'case': 'Nom', 'number': 'Sing', 'degree': 'Sup'},
+        'seikkailevin'
+    ),
+    (
+        {'token': 'valloittava', 'case': 'Nom', 'number': 'Sing', 'degree': 'Cmp'},
+        'valloittavampi'
+    ),
+    (
+        {'token': 'valloittava', 'case': 'Nom', 'number': 'Sing', 'degree': 'Sup'},
+        'valloittavin'
+    ),
+    (
+        {'token': 'hämärtävä', 'case': 'Nom', 'number': 'Sing', 'degree': 'Cmp'},
+        'hämärtävämpi'
+    ),
+    (
+        {'token': 'hämärtävä', 'case': 'Nom', 'number': 'Sing', 'degree': 'Sup'},
+        'hämärtävin'
+    ),
+    (
+        {'token': 'uusi', 'case': 'Nom', 'number': 'Sing', 'degree': 'Cmp'},
+        'uudempi'
+    ),
+    (
+        {'token': 'uusi', 'case': 'Nom', 'number': 'Sing', 'degree': 'Sup'},
+        'uusin'
+    ),
+    (
+        {'token': 'uusi', 'case': 'Ela', 'number': 'Sing', 'degree': 'Sup'},
+        'uusimmasta'
+    ),
+    (
+        {'token': 'uusi', 'case': 'Nom', 'number': 'Plur', 'degree': 'Sup'},
+        'uusimmat'
     ),
     (
         {'token': 'hyvä', 'case': 'Nom', 'number': 'Sing', 'degree': 'Cmp'},
@@ -1420,6 +1468,20 @@ NOT_YET_IMPLEMENTED_NOUN_EXAMPLES = [
         {'token': 'hyvä', 'case': 'Ade', 'number': 'Sing', 'degree': 'Sup'},
         'parhaalla'
     ),
+
+    # Missing/incorrect inflection data on compound words
+    (
+        {'token': 'silmänpohja', 'case': 'Gen', 'number': 'Plur', 'person_psor': '2'},
+        'silmänpohjiesi'
+    ),
+    (
+        {'token': 'mustakynsi', 'case': 'Par', 'number': 'Plur', 'person_psor': '1', 'number_psor': 'Plur'},
+        'mustakynsiämme'
+    ),
+    (
+        {'token': 'maailmanjärjestys', 'case': 'Ine', 'number': 'Sing', 'person_psor': '1'},
+        'maailmanjärjestyksessäni'
+    ),
 ]
 
 NOT_YET_IMPLEMENTED_PRONOUN_EXAMPLES = [
@@ -1481,7 +1543,7 @@ def test_inflect_adjective(inflection, expected):
 
 
 @pytest.mark.parametrize("inflection,expected", NUMERAL_EXAMPLES)
-def test_inflect_adjective(inflection, expected):
+def test_inflect_numeral(inflection, expected):
     assert inflect_nominal(**inflection) == expected
 
 
