@@ -114,6 +114,7 @@ class Grammar:
                 person=attributes.get('person'),
                 number=attributes.get('number'),
                 mood=attributes.get('mood'),
+                infform=attributes.get('infform'),
                 partform=attributes.get('partform'),
                 connegative=attributes.get('connegative'))
         elif word_class in ['laatusana', 'lukusana', 'nimisana']:
@@ -245,7 +246,10 @@ grammar = Grammar({
     ],
     'V': [
         [Terminal('teonsana')],
-        [Terminal('teonsana', 'olla'), Terminal('teonsana', partform='Past')]
+        [Terminal('teonsana', 'olla'), Terminal('teonsana', partform='Past')],
+        [Terminal('teonsana', ['alkaa', 'ehtiä', 'meinata', 'saada', 'saattaa',
+                               'tahtoa', 'taitaa', 'uhata', 'voida']),
+         Terminal('teonsana', infform='1')]
     ],
     'N': [
         [Terminal('nimisana')]

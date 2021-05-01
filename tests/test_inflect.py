@@ -195,6 +195,70 @@ ACTIVE_INDICATIVE_EXAMPLES = [
         'uivat'
     ),
     (
+        {'token': 'nähdä', 'tense': 'Past', 'person': '2', 'number': 'Sing', 'mood': 'Ind'},
+        'näit'
+    ),
+    (
+        {'token': 'nähdä', 'tense': 'Past', 'person': '3', 'number': 'Sing', 'mood': 'Ind'},
+        'näki'
+    ),
+    (
+        {'token': 'nähdä', 'tense': 'Past', 'person': '2', 'number': 'Plur', 'mood': 'Ind'},
+        'näitte'
+    ),
+    (
+        {'token': 'nähdä', 'tense': 'Past', 'person': '3', 'number': 'Plur', 'mood': 'Ind'},
+        'näkivät'
+    ),
+    (
+        {'token': 'alkaa', 'tense': 'Pres', 'person': '2', 'number': 'Sing', 'mood': 'Ind'},
+        'alat'
+    ),
+    (
+        {'token': 'alkaa', 'tense': 'Pres', 'person': '3', 'number': 'Sing', 'mood': 'Ind'},
+        'alkaa'
+    ),
+    (
+        {'token': 'alkaa', 'tense': 'Pres', 'person': '3', 'number': 'Plur', 'mood': 'Ind'},
+        'alkavat'
+    ),
+    (
+        {'token': 'alkaa', 'tense': 'Past', 'person': '2', 'number': 'Plur', 'mood': 'Ind'},
+        'aloitte'
+    ),
+    (
+        {'token': 'alkaa', 'tense': 'Past', 'person': '3', 'number': 'Plur', 'mood': 'Ind'},
+        'alkoivat'
+    ),
+    (
+        {'token': 'meinata', 'tense': 'Pres', 'person': '3', 'number': 'Sing', 'mood': 'Ind'},
+        'meinaa'
+    ),
+    (
+        {'token': 'uhata', 'tense': 'Past', 'person': '2', 'number': 'Sing', 'mood': 'Ind'},
+        'uhkasit'
+    ),
+    (
+        {'token': 'uhata', 'tense': 'Past', 'person': '3', 'number': 'Sing', 'mood': 'Ind'},
+        'uhkasi'
+    ),
+    (
+        {'token': 'uhata', 'tense': 'Past', 'person': '2', 'number': 'Plur', 'mood': 'Ind'},
+        'uhkasitte'
+    ),
+    (
+        {'token': 'uhata', 'tense': 'Past', 'person': '3', 'number': 'Plur', 'mood': 'Ind'},
+        'uhkasivat'
+    ),
+    (
+        {'token': 'kumartaa', 'tense': 'Past', 'person': '1', 'number': 'Sing', 'mood': 'Ind'},
+        'kumarsin'
+    ),
+    (
+        {'token': 'kumartaa', 'tense': 'Past', 'person': '3', 'number': 'Sing', 'mood': 'Ind'},
+        'kumarsi'
+    ),
+    (
         {'token': 'olla', 'tense': 'Pres', 'person': '1', 'number': 'Sing', 'mood': 'Ind'},
         'olen'
     ),
@@ -434,6 +498,30 @@ ACTIVE_CONDITIONAL_EXAMPLES = [
     (
         {'token': 'lykätä', 'tense': 'Pres', 'person': '3', 'number': 'Plur', 'mood': 'Cnd'},
         'lykkäisivät',
+    ),
+    (
+        {'token': 'taitaa', 'tense': 'Pres', 'person': '1', 'number': 'Sing', 'mood': 'Cnd'},
+        'taitaisin',
+    ),
+    (
+        {'token': 'taitaa', 'tense': 'Pres', 'person': '2', 'number': 'Sing', 'mood': 'Cnd'},
+        'taitaisit',
+    ),
+    (
+        {'token': 'taitaa', 'tense': 'Pres', 'person': '3', 'number': 'Sing', 'mood': 'Cnd'},
+        'taitaisi',
+    ),
+    (
+        {'token': 'taitaa', 'tense': 'Pres', 'person': '1', 'number': 'Plur', 'mood': 'Cnd'},
+        'taitaisimme',
+    ),
+    (
+        {'token': 'taitaa', 'tense': 'Pres', 'person': '2', 'number': 'Plur', 'mood': 'Cnd'},
+        'taitaisitte',
+    ),
+    (
+        {'token': 'taitaa', 'tense': 'Pres', 'person': '3', 'number': 'Plur', 'mood': 'Cnd'},
+        'taitaisivat',
     ),
     (
         {'token': 'olla', 'tense': 'Pres', 'person': '1', 'number': 'Sing', 'mood': 'Cnd'},
@@ -910,6 +998,17 @@ PARTICIPLE_EXAMPLES = [
     ),
 ]
 
+INFINITE_EXAMPLES = [
+    (
+        {'token': 'haluta', 'infform': '1'},
+        'haluta',
+    ),
+    (
+        {'token': 'esittää', 'infform': '1'},
+        'esittää',
+    ),
+]
+    
 NOUN_EXAMPLES = [
     # sijamuodot
     (
@@ -1642,6 +1741,52 @@ NOT_YET_IMPLEMENTED_PRONOUN_EXAMPLES = [
     )
 ]
 
+NOT_YET_IMPLEMENTED_VERB_EXAMPLES = [
+    # E-infinite
+    (
+        {'token': 'muistella', 'case': 'Ine', 'infform': '2'},
+        'muistellessa'
+    ),
+    (
+        {'token': 'muistella', 'case': 'Ins', 'infform': '2'},
+        'muistellen'
+    ),
+    (
+        {'token': 'muistella', 'case': 'Ine', 'person_psor': '1', 'infform': '2'},
+        'muistellessani'
+    ),
+    (
+        {'token': 'muistella', 'case': 'Ine', 'infform': '2'},
+        'muistellessa'
+    ),
+
+    # MA-infinite
+    (
+        {'token': 'hypätä', 'case': 'Ine', 'infform': '3'},
+        'hyppäämässä'
+    ),
+    (
+        {'token': 'hypätä', 'case': 'Ela', 'infform': '3'},
+        'hyppäämästä'
+    ),
+    (
+        {'token': 'hypätä', 'case': 'Ill', 'infform': '3'},
+        'hyppäämään'
+    ),
+    (
+        {'token': 'hypätä', 'case': 'Ade', 'infform': '3'},
+        'hyppäämällä'
+    ),
+    (
+        {'token': 'hypätä', 'case': 'Abe', 'infform': '3'},
+        'hyppäämättä'
+    ),
+    (
+        {'token': 'hypätä', 'case': 'Ins', 'infform': '3'},
+        'hyppäämän'
+    ),
+]
+
 
 @pytest.mark.parametrize("inflection,expected", ACTIVE_INDICATIVE_EXAMPLES)
 def test_conjugate_verb_active_indicative(inflection, expected):
@@ -1670,6 +1815,11 @@ def test_conjugate_verb_passive(inflection, expected):
 
 @pytest.mark.parametrize("inflection,expected", PARTICIPLE_EXAMPLES)
 def test_conjugate_verb_participle(inflection, expected):
+    assert conjugate_verb(**inflection) == expected
+
+
+@pytest.mark.parametrize("inflection,expected", INFINITE_EXAMPLES)
+def test_conjugate_verb_infinite(inflection, expected):
     assert conjugate_verb(**inflection) == expected
 
 
@@ -1703,3 +1853,9 @@ def test_inflect_not_implemented_noun(inflection, expected):
 @pytest.mark.parametrize("inflection,expected", NOT_YET_IMPLEMENTED_PRONOUN_EXAMPLES)
 def test_inflect_not_implemented_pronoun(inflection, expected):
     assert inflect_pronoun(**inflection) == expected
+
+
+@pytest.mark.xfail
+@pytest.mark.parametrize("inflection,expected", NOT_YET_IMPLEMENTED_VERB_EXAMPLES)
+def test_inflect_not_implemented_verb(inflection, expected):
+    assert conjugate_verb(**inflection) == expected

@@ -1,7 +1,6 @@
 import re
 from typing import Literal, Optional
 from voikko.inflect_word import inflect_word, WORD_CLASSES
-from voikko.voikkoinfl import __apply_gradation
 from voikko.voikkoutils import VOWEL_BACK, get_wordform_infl_vowel_type
 
 case_affixes = {
@@ -165,6 +164,7 @@ def conjugate_verb(token: str,
                    person: Literal['1', '2', '3', '4']='1',
                    number: Literal['Sing', 'Plur']='Sing',
                    mood: Literal['Ind', 'Cnd', 'Imp', 'Pot']='Ind',
+                   infform: Optional[Literal['1', '2', '3']]=None,
                    partform: Optional[Literal['Pres', 'Past', 'Agt']]=None,
                    connegative: bool=False) -> str:
     if token == 'ei':
@@ -172,6 +172,9 @@ def conjugate_verb(token: str,
 
     elif connegative:
         return _conjugate_verb_connegative(token, tense, person, mood, number)
+
+    elif infform:
+        return _conjugate_verb_infinite(token, infform)
 
     elif partform:
         return _conjugate_verb_participle(token, person, number, partform)
@@ -362,34 +365,52 @@ def _conjugate_verb_indicative(token, tense, person, number):
             affix = verb_person_number_affix[person + '_' + number]
     elif tense == 'Pres':
         if 'preesens_yks_1' in forms:
-            stem = forms['preesens_yks_1'][:-1]
-            grad = _gradation_type(token)
-            if grad in ['av1', 'av3', 'av5'] and person == '3':
-                # Suora astevaihtelu, tarvitaan heikko vartalo
-                grad_tuple = __apply_gradation(forms['preesens_yks_1'], grad)
-                if grad_tuple is not None:
-                    stem = grad_tuple[0][:-1]
+            if person == '3':
+                stem = _vowel_stem(forms, strong=True)
+            else:
+                stem = forms['preesens_yks_1'][:-1]
         else:
             # A very crude guess for the stem
             stem = token[:-1]
             while stem and not is_vowel(stem[-1]):
                 stem = stem[:-1]
 
-        if (person == '3' and number == 'Sing' and
-            ((len(stem) >= 2 and not is_vowel(stem[-2]) and is_vowel(stem[-1])) or
-             _is_supistuma_verbi(forms))):
-            affix = stem[-1]
+        if person == '3' and number == 'Sing':
+            if _is_diphthong_or_long_vowel(stem[-2:]):
+                affix = ''
+            elif ((len(stem) >= 2 and not is_vowel(stem[-2]) and is_vowel(stem[-1])) or
+                  _is_supistuma_verbi(forms)):
+                affix = stem[-1]
+            else:
+                affix = ''
         else:
             affix = verb_person_number_affix[person + '_' + number]
-    else:
+    else: # tense = 'Past'
         if 'imperfekti_yks_3' in forms:
-            stem = forms['imperfekti_yks_3']
-            grad = _gradation_type(token)
-            if grad in ['av1', 'av3', 'av5'] and person in ['1', '2']:
-                # Suora astevaihtelu, tarvitaan vahva vartalo
-                grad_tuple = __apply_gradation(stem, grad)
-                if grad_tuple:
-                    stem = grad_tuple[1]
+            if person == '3':
+                stem = forms['imperfekti_yks_3']
+            else:
+                stem = forms['preesens_yks_1'][:-1]
+                if (token.endswith('ltaa') or token.endswith('ltää') or
+                    token.endswith('rtaa') or token.endswith('rtää') or
+                    token.endswith('ntaa') or token.endswith('ntää') or
+                    _is_supistuma_verbi(forms)):
+                    stem = forms['imperfekti_yks_3']
+                elif len(stem) >= 2 and stem[-1] == stem[-2] and is_vowel(stem[-1]):
+                    stem = stem[:-1] + 'i'
+                elif stem.endswith('e') or stem.endswith('ä'):
+                    stem = stem[:-1] + 'i'
+                elif _has_one_syllable_inaccurate(stem) and (stem[-2:] == 'ie' or
+                                                             re.match('[uy][oö]', stem[-2:])):
+                    stem = stem[:-2] + stem[-1] + 'i'
+                elif _has_two_syllables_inaccurate(token) and stem[-1] == 'a':
+                    fst_vowel = _first_vowel(stem)
+                    if fst_vowel == 'a':
+                        stem = stem[:-1] + 'oi'
+                    elif fst_vowel in ['o', 'u']:
+                        stem = stem[:-1] + 'i'
+                    else:
+                        stem = stem + 'i'
         else:
             # A very crude guess
             stem = token[:-1]
@@ -450,6 +471,14 @@ def _conjugate_verb_connegative(token, tense, person, mood, number):
                 return forms['partisiippi_2'][:-2] + 'eet'
 
     # should not be reached
+    return token
+
+
+def _conjugate_verb_infinite(token, infform):
+    if infform == '1':
+        return token
+
+    # TODO: other infinite forms
     return token
 
 
@@ -532,10 +561,10 @@ def _is_supistuma_verbi(forms):
     # https://kaino.kotus.fi/visk/sisallys.php?p=330
 
     inf = forms.get('infinitiivi_1', '')
-    preesens_yks_1 = forms.get('preesens_yks_1', '---')
+    vowel_stem = _vowel_stem(forms, strong=True) or inf
     return ((inf.endswith('ta') or inf.endswith('tä')) and
-            ((preesens_yks_1[-2] == 'a') or
-             (len(preesens_yks_1) >= 3 and is_vowel(preesens_yks_1[-2]) and is_vowel(preesens_yks_1[-3]))))
+            len(vowel_stem) >= 2 and is_vowel(vowel_stem[-2]) and
+            (vowel_stem[-1] in 'aä' or vowel_stem[-2] == vowel_stem[-1]))
 
 
 def _gradation_type(token):
@@ -593,6 +622,11 @@ def _append_affix_with_vowel_harmony(stem, affix):
     return stem + affix
 
 
+def _has_one_syllable_inaccurate(word):
+    return len(word) <= 3
+
+
+diphthong_expression = 'aa|ee|ii|oo|uu|yy|ää|öö|ai|ei|oi|ui|yi|äi|öi|au|eu|iu|ou|äy|öy|iy|ey|ie|uo|yö'
 def _has_two_syllables_inaccurate(word):
     """Does the word have two syllables?
 
@@ -600,11 +634,15 @@ def _has_two_syllables_inaccurate(word):
     # the most syllables include CV, VV, or VC
     syllable_elements = [
         '[bcdfghjklmnpqrstvwxz][aeiouyäö]',
-        'aa|ee|ii|oo|uu|yy|ää|öö|ai|ei|oi|ui|yi|äi|öi|au|eu|iu|ou|äy|öy|iy|ey|ie|uo|yö',
+        diphthong_expression,
         '[aeiouyäö][bcdfghjklmnpqrstvwxz]',
     ]
     x = sum(1 for _ in re.finditer('|'.join(syllable_elements), word, re.IGNORECASE))
     return x <= 2
+
+
+def _is_diphthong_or_long_vowel(two_character_string):
+    return re.fullmatch(diphthong_expression, two_character_string) is not None
 
 
 def replace_vowel_placeholders(s, vowel_type):
@@ -618,6 +656,13 @@ def replace_vowel_placeholders(s, vowel_type):
     return re.sub('[AOU]', vowel_repl, s)
 
 
+def _first_vowel(word):
+    for c in word:
+        if is_vowel(c):
+            return c
+    return None
+
+
 def is_vowel(c):
     return c.lower() in ['a', 'e', 'i', 'o', 'u', 'y', 'ä', 'ö', 'å']
 
@@ -628,3 +673,5 @@ for key, val in WORD_CLASSES.items():
         WORD_CLASSES[key] = ['subst-vieras' if x == 'subst-kaunis' else x for x in val]
     if 'subst-tosi' in val:
         WORD_CLASSES[key] = ['subst-susi' if x == 'subst-tosi' else x for x in val]
+    if 'verbi-taitaa' in val:
+        WORD_CLASSES[key] = ['verbi-hohtaa-av1' if x == 'verbi-taitaa' else x for x in val]
