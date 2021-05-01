@@ -774,6 +774,142 @@ PASSIVE_EXAMPLES = [
     ),
 ]
 
+PARTICIPLE_EXAMPLES = [
+    # VA participle
+    (
+        {'token': 'kertoa', 'person': '1', 'number': 'Sing', 'partform': 'Pres'},
+        'kertova',
+    ),
+    (
+        {'token': 'säilyä', 'person': '1', 'number': 'Sing', 'partform': 'Pres'},
+        'säilyvä',
+    ),
+    (
+        {'token': 'hakea', 'person': '1', 'number': 'Sing', 'partform': 'Pres'},
+        'hakeva',
+    ),
+    (
+        {'token': 'tupakoida', 'person': '1', 'number': 'Sing', 'partform': 'Pres'},
+        'tupakoiva',
+    ),
+    (
+        {'token': 'tupakoida', 'person': '4', 'number': 'Sing', 'partform': 'Pres'},
+        'tupakoitava',
+    ),
+    (
+        {'token': 'uida', 'person': '4', 'number': 'Sing', 'partform': 'Pres'},
+        'uitava',
+    ),
+    (
+        {'token': 'nähdä', 'person': '4', 'number': 'Sing', 'partform': 'Pres'},
+        'nähtävä',
+    ),
+    (
+        {'token': 'lukea', 'person': '4', 'number': 'Sing', 'partform': 'Pres'},
+        'luettava',
+    ),
+    (
+        {'token': 'hypätä', 'person': '4', 'number': 'Sing', 'partform': 'Pres'},
+        'hypättävä',
+    ),
+    
+    # NUT participle
+    (
+        {'token': 'olla', 'person': '1', 'number': 'Sing', 'partform': 'Past'},
+        'ollut',
+    ),
+    (
+        {'token': 'olla', 'person': '1', 'number': 'Plur', 'partform': 'Past'},
+        'olleet',
+    ),
+    (
+        {'token': 'olla', 'person': '4', 'partform': 'Past'},
+        'oltu',
+    ),
+    (
+        {'token': 'nähdä', 'person': '1', 'number': 'Sing', 'partform': 'Past'},
+        'nähnyt',
+    ),
+    (
+        {'token': 'nähdä', 'person': '1', 'number': 'Plur', 'partform': 'Past'},
+        'nähneet',
+    ),
+    (
+        {'token': 'nähdä', 'person': '4', 'partform': 'Past'},
+        'nähty',
+    ),
+    (
+        {'token': 'yrittää', 'person': '1', 'number': 'Sing', 'partform': 'Past'},
+        'yrittänyt',
+    ),
+    (
+        {'token': 'yrittää', 'person': '1', 'number': 'Plur', 'partform': 'Past'},
+        'yrittäneet',
+    ),
+    (
+        {'token': 'yrittää', 'person': '4', 'partform': 'Past'},
+        'yritetty',
+    ),
+    (
+        {'token': 'kaivata', 'person': '1', 'number': 'Sing', 'partform': 'Past'},
+        'kaivannut',
+    ),
+    (
+        {'token': 'kaivata', 'person': '1', 'number': 'Plur', 'partform': 'Past'},
+        'kaivanneet',
+    ),
+    (
+        {'token': 'kaivata', 'person': '4', 'partform': 'Past'},
+        'kaivattu',
+    ),
+    (
+        {'token': 'nousta', 'person': '1', 'number': 'Sing', 'partform': 'Past'},
+        'noussut',
+    ),
+    (
+        {'token': 'nousta', 'person': '1', 'number': 'Plur', 'partform': 'Past'},
+        'nousseet',
+    ),
+    (
+        {'token': 'nousta', 'person': '4', 'partform': 'Past'},
+        'noustu',
+    ),
+    (
+        {'token': 'vaieta', 'person': '1', 'number': 'Sing', 'partform': 'Past'},
+        'vaiennut',
+    ),
+    (
+        {'token': 'vaieta', 'person': '1', 'number': 'Plur', 'partform': 'Past'},
+        'vaienneet',
+    ),
+    (
+        {'token': 'vaieta', 'person': '4', 'partform': 'Past'},
+        'vaiettu',
+    ),
+
+    # MA participle
+    (
+        {'token': 'leipoa', 'person': '1', 'number': 'Sing', 'partform': 'Agt'},
+        'leipoma',
+    ),
+    (
+        {'token': 'leipoa', 'person': '4', 'partform': 'Agt'},
+        'leipoma',
+    ),
+    (
+        {'token': 'havaita', 'person': '1', 'number': 'Sing', 'partform': 'Agt'},
+        'havaitsema',
+    ),
+    (
+        {'token': 'kähveltää', 'person': '1', 'number': 'Sing', 'partform': 'Agt'},
+        'kähveltämä',
+    ),
+    (
+        {'token': 'löytää', 'person': '1', 'number': 'Sing', 'partform': 'Agt'},
+        'löytämä',
+    ),
+]
+
 NOUN_EXAMPLES = [
     # sijamuodot
     (
@@ -1529,6 +1665,11 @@ def test_conjugate_verb_active_potential(inflection, expected):
 
 @pytest.mark.parametrize("inflection,expected", PASSIVE_EXAMPLES)
 def test_conjugate_verb_passive(inflection, expected):
+    assert conjugate_verb(**inflection) == expected
+
+
+@pytest.mark.parametrize("inflection,expected", PARTICIPLE_EXAMPLES)
+def test_conjugate_verb_participle(inflection, expected):
     assert conjugate_verb(**inflection) == expected
 
 

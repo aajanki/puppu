@@ -12,11 +12,27 @@ class Vocabulary:
         vocab = {}
         vocab_path = Path('data/vocab')
         for f in vocab_path.glob('*.txt'):
-            vocab[f.stem] = [x.strip() for x in f.open('r', encoding='utf-8').readlines()]
+            words = []
+            weights = []
+            for line in f.open('r', encoding='utf-8'):
+                line = line.strip()
+                if ' ' in line:
+                    freq, word = line.split(' ', 1)
+                    freq = float(freq)
+                else:
+                    word = line
+                    freq = 1.0
+                words.append(word)
+                weights.append(freq)
+            vocab[f.stem] = (words, weights)
         return vocab
 
     def random_word(self, word_class):
-        return random.choice(self.vocabulary.get(word_class, ''))
+        if word_class in self.vocabulary:
+            words, weights = self.vocabulary[word_class]
+            return random.choices(words, weights=weights)[0]
+        else:
+            return ''
 
 
 class Grammar:
@@ -94,24 +110,25 @@ class Grammar:
         if word_class == 'teonsana':
             return conjugate_verb(
                 lexeme,
-                tense=attributes.get('tense', 'Pres'),
-                person=attributes.get('person', '1'),
-                number=attributes.get('number', 'Sing'),
-                mood=attributes.get('mood', 'Ind'),
-                connegative=attributes.get('connegative', False))
+                tense=attributes.get('tense'),
+                person=attributes.get('person'),
+                number=attributes.get('number'),
+                mood=attributes.get('mood'),
+                partform=attributes.get('partform'),
+                connegative=attributes.get('connegative'))
         elif word_class in ['laatusana', 'lukusana', 'nimisana']:
             return inflect_nominal(
                 lexeme,
-                case=attributes.get('case', 'Nom'),
-                number=attributes.get('number', 'Sing'),
-                degree=attributes.get('degree', 'Pos'),
+                case=attributes.get('case'),
+                number=attributes.get('number'),
+                degree=attributes.get('degree'),
                 person_psor=attributes.get('person_psor'),
                 number_psor=attributes.get('number_psor'))
         elif word_class == 'asemosana':
             return inflect_pronoun(
                 lexeme,
-                case=attributes.get('case', 'Nom'),
-                number=attributes.get('number', 'Sing'))
+                case=attributes.get('case'),
+                number=attributes.get('number'))
         else:
             return lexeme
 
@@ -156,7 +173,6 @@ grammar = Grammar({
         [R('NP'), R('VP')], # Repeated to make this clause type more common
 
         # passive
-        [R('V', person='4'), Optional(R('AdvP'), 0.2), Optional(Punct('!'))],
         [R('NP', case='Ine'), R('V', person='4'), Optional(R('AdvP'), 0.2)],
 
         # conditional
@@ -228,7 +244,8 @@ grammar = Grammar({
         [Terminal('laatusana')],
     ],
     'V': [
-        [Terminal('teonsana')]
+        [Terminal('teonsana')],
+        [Terminal('teonsana', 'olla'), Terminal('teonsana', partform='Past')]
     ],
     'N': [
         [Terminal('nimisana')]
