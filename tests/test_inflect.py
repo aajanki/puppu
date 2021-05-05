@@ -400,6 +400,10 @@ ACTIVE_INDICATIVE_EXAMPLES = [
         {'token': 'kertoa', 'tense': 'Pres', 'person': '4', 'number': 'Sing', 'mood': 'Imp', 'connegative': True},
         'kerrottako'
     ),
+    (
+        {'token': 'suudella', 'tense': 'Past', 'person': '4', 'number': 'Sing', 'mood': 'Ind', 'connegative': True},
+        'suudeltu'
+    ),
 ]
 
 ACTIVE_CONDITIONAL_EXAMPLES = [
@@ -1705,6 +1709,10 @@ NOT_YET_IMPLEMENTED_NOUN_EXAMPLES = [
     ),
 
     # Missing/incorrect inflection data on compound words
+    (
+        {'token': 'toimituskyky', 'case': 'Par', 'number': 'Sing', 'person_psor': '1', 'number_psor': 'Plur'},
+        'toimituskykyämme'
+    ),
     (
         {'token': 'silmänpohja', 'case': 'Gen', 'number': 'Plur', 'person_psor': '2'},
         'silmänpohjiesi'

@@ -174,7 +174,7 @@ grammar = Grammar({
         [R('NP'), R('VP')], # Repeated to make this clause type more common
 
         # passive
-        [R('NP', case='Ine'), R('V', person='4'), Optional(R('AdvP'), 0.2)],
+        [R('NP', case='Ine'), R('VPass'), Optional(R('AdvP'), 0.2)],
 
         # conditional
         [R('NP', case='Nom'),
@@ -192,6 +192,16 @@ grammar = Grammar({
 
         # interrogative clause
         [Terminal('asemosana', ['mikä', 'kuka']), R('VP'), Punct('?')],
+
+        # omistuslause: https://kaino.kotus.fi/visk/sisallys.php?p=895
+        [R('NP', case='Ade'),
+         Terminal('teonsana', 'olla', person='3', number='Sing'),
+         R('NP', case='Nom')],
+
+        # tuloslause: https://kaino.kotus.fi/visk/sisallys.php?p=904
+        [R('NP', case='Ela'),
+         Terminal('teonsana', ['tulla', 'kehittyä', 'muodostua'], person='3', number='Sing'),
+         R('PREDICATIVE')]
     ],
     'OBJECTIVE': [
         [R('NP', case='Gen')],
@@ -211,10 +221,7 @@ grammar = Grammar({
         [R('V', person='3'), Optional(R('AdvP'), 0.5)],
         [R('V', person='3'), R('OBJECTIVE'), Optional(R('AdvP'), 0.2)],
 
-        [Terminal('teonsana', 'ei', person='3'),
-         Optional(Terminal('seikkasana', ['koskaan', 'kuitenkaan', 'aina', 'onneksi', 'ehkä', 'enää']), 0.2),
-         R('V', person='3', connegative=True),
-         Optional(R('AdvP'), 0.2)],
+        [R('V'), Optional(R('AdvP'), 0.2)],
 
         # predicative
         [Terminal('teonsana', 'olla', person='3'), R('PREDICATIVE')],
@@ -223,6 +230,14 @@ grammar = Grammar({
         [R('N')],
         [R('AP'), R('N')],
         [R('NP', case='Gen'), R('N')],
+        [R('NPPron')],
+        [R('NP'),
+         Punct(','),
+         Terminal('asemosana', ['joka', 'mikä']),
+         R('VP'),
+         Punct(',')]
+    ],
+    'NPPron': [
         [Optional(Terminal('asemosana', 'minä', case='Gen', number='Sing')),
          Optional(R('AP')),
          R('N', person_psor='1', number_psor='Sing')],
@@ -235,21 +250,30 @@ grammar = Grammar({
         [Optional(Terminal('asemosana', 'sinä', case='Gen', number='Plur')),
          Optional(R('AP')),
          R('N', person_psor='2', number_psor='Plur')],
-        [R('NP'),
-         Punct(','),
-         Terminal('asemosana', ['joka', 'mikä']),
-         R('VP'),
-         Punct(',')]
     ],
     'AP': [
         [Terminal('laatusana')],
     ],
     'V': [
         [Terminal('teonsana')],
+        [Terminal('teonsana', 'ei', person='3'),
+         Optional(Terminal('seikkasana', ['koskaan', 'kuitenkaan', 'aina', 'onneksi', 'ehkä', 'enää']), 0.2),
+         Terminal('teonsana', person='3', connegative=True)],
         [Terminal('teonsana', 'olla'), Terminal('teonsana', partform='Past')],
+        [Terminal('teonsana', 'ei'),
+         Terminal('teonsana', 'olla', person='3', connegative=True),
+         Terminal('teonsana', partform='Past')],
         [Terminal('teonsana', ['alkaa', 'ehtiä', 'meinata', 'saada', 'saattaa',
                                'tahtoa', 'taitaa', 'uhata', 'voida']),
          Terminal('teonsana', infform='1')]
+    ],
+    'VPass': [
+        [Terminal('teonsana', person='4')],
+        [Terminal('teonsana', 'ei', person='4'),
+         Optional(Terminal('seikkasana', ['koskaan', 'kuitenkaan', 'aina', 'onneksi', 'ehkä', 'enää']), 0.2),
+         Terminal('teonsana', person='4', connegative=True)],
+        [Terminal('teonsana', 'olla', person='3', number='Sing'),
+         Terminal('teonsana', person='4', partform='Past')],
     ],
     'N': [
         [Terminal('nimisana')]

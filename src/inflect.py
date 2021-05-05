@@ -456,8 +456,10 @@ def _conjugate_verb_connegative(token, tense, person, mood, number):
 
     else: # mood == 'Ind'
         forms = inflect_word(token, required_wclass='verbi')
-        if person == '4':
+        if person == '4' and tense == 'Pres':
             return _conjugate_verb_passive(token, tense, number, 'Ind', include_person_affix = False)
+        if person == '4' and tense == 'Past':
+            return _conjugate_verb_participle(token, '4', number, partform='Past')
         elif tense == 'Pres': # and person in ('1', '2', '3')
             form = forms.get('preesens_yks_1')
             return form[:-1] if form else token
