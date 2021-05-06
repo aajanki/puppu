@@ -65,7 +65,7 @@ class Grammar:
         attributes = {
             'case': 'Nom',
             'number': random.choice(['Sing', 'Plur']),
-            'person': random.choice(['1', '2', '3']),
+            'person': '3',
             'tense': random.choice(['Pres', 'Past']),
             'mood': 'Ind',
         }
@@ -170,8 +170,8 @@ R = Rule
 grammar = Grammar({
     'SENTENCE': [
         # declarative sentence
-        [R('NP'), R('VP')],
-        [R('NP'), R('VP')], # Repeated to make this clause type more common
+        [R('NP', case='Nom'), R('VP', person='3')],
+        [R('NP', case='Nom'), R('VP', person='3')], # Repeated to make this clause type more common
 
         # passive
         [R('NP', case='Ine'), R('VPass'), Optional(R('AdvP'), 0.2)],
@@ -191,7 +191,7 @@ grammar = Grammar({
          Punct(',')],
 
         # interrogative clause
-        [Terminal('asemosana', ['mikä', 'kuka']), R('VP'), Punct('?')],
+        [Terminal('asemosana', ['mikä', 'kuka']), R('VP', person='3'), Punct('?')],
 
         # omistuslause: https://kaino.kotus.fi/visk/sisallys.php?p=895
         [R('NP', case='Ade'),
@@ -218,13 +218,13 @@ grammar = Grammar({
          R('N', case='Nom')],
     ],
     'VP': [
-        [R('V', person='3'), Optional(R('AdvP'), 0.5)],
-        [R('V', person='3'), R('OBJECTIVE'), Optional(R('AdvP'), 0.2)],
+        [R('V'), Optional(R('AdvP'), 0.5)],
+        [R('V'), R('OBJECTIVE'), Optional(R('AdvP'), 0.2)],
 
         [R('V'), Optional(R('AdvP'), 0.2)],
 
         # predicative
-        [Terminal('teonsana', 'olla', person='3'), R('PREDICATIVE')],
+        [Terminal('teonsana', 'olla'), R('PREDICATIVE')],
     ],
     'NP': [
         [R('N')],
@@ -256,7 +256,7 @@ grammar = Grammar({
     ],
     'V': [
         [Terminal('teonsana')],
-        [Terminal('teonsana', 'ei', person='3'),
+        [Terminal('teonsana', 'ei'),
          Optional(Terminal('seikkasana', ['koskaan', 'kuitenkaan', 'aina', 'onneksi', 'ehkä', 'enää']), 0.2),
          Terminal('teonsana', person='3', connegative=True)],
         [Terminal('teonsana', 'olla'), Terminal('teonsana', partform='Past')],
