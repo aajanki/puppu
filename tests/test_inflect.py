@@ -1291,6 +1291,24 @@ NOUN_EXAMPLES = [
         {'token': 'hyöty', 'case': 'Tra', 'number': 'Plur', 'person_psor': '1', 'number_psor': 'Plur'},
         'hyödyiksemme'
     ),
+
+    # Compound words which do not appear in WORD_CLASSES
+    (
+        {'token': 'toimituskyky', 'case': 'Par', 'number': 'Sing', 'person_psor': '1', 'number_psor': 'Plur'},
+        'toimituskykyämme'
+    ),
+    (
+        {'token': 'silmänpohja', 'case': 'Gen', 'number': 'Plur', 'person_psor': '2'},
+        'silmänpohjiesi'
+    ),
+    (
+        {'token': 'mustakynsi', 'case': 'Par', 'number': 'Plur', 'person_psor': '1', 'number_psor': 'Plur'},
+        'mustakynsiämme'
+    ),
+    (
+        {'token': 'maailmanjärjestys', 'case': 'Ine', 'number': 'Sing', 'person_psor': '1'},
+        'maailmanjärjestyksessäni'
+    ),
 ]
 
 ADJECTIVE_EXAMPLES = [
@@ -1706,24 +1724,6 @@ NOT_YET_IMPLEMENTED_NOUN_EXAMPLES = [
     (
         {'token': 'hyvä', 'case': 'Ade', 'number': 'Sing', 'degree': 'Sup'},
         'parhaalla'
-    ),
-
-    # Missing/incorrect inflection data on compound words
-    (
-        {'token': 'toimituskyky', 'case': 'Par', 'number': 'Sing', 'person_psor': '1', 'number_psor': 'Plur'},
-        'toimituskykyämme'
-    ),
-    (
-        {'token': 'silmänpohja', 'case': 'Gen', 'number': 'Plur', 'person_psor': '2'},
-        'silmänpohjiesi'
-    ),
-    (
-        {'token': 'mustakynsi', 'case': 'Par', 'number': 'Plur', 'person_psor': '1', 'number_psor': 'Plur'},
-        'mustakynsiämme'
-    ),
-    (
-        {'token': 'maailmanjärjestys', 'case': 'Ine', 'number': 'Sing', 'person_psor': '1'},
-        'maailmanjärjestyksessäni'
     ),
 ]
 

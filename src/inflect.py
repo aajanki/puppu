@@ -1,5 +1,6 @@
 import re
 from typing import Literal, Optional
+from voikko import libvoikko
 from voikko.inflect_word import inflect_word, WORD_CLASSES
 from voikko.voikkoutils import VOWEL_BACK, get_wordform_infl_vowel_type
 
@@ -158,6 +159,8 @@ ei_conjugation = {
     '4_Plur_Imp': 'älköön',
 }
 
+voikko = libvoikko.Voikko('fi')
+
 def conjugate_verb(token: str,
                    *,
                    tense: Literal['Pres', 'Past']='Pres',
@@ -203,6 +206,17 @@ def inflect_nominal(token: str,
                     degree: Optional[Literal['Pos', 'Cmp', 'Sup']] = None,
                     person_psor: Optional[Literal['1', '2', '3']] = None,
                     number_psor: Optional[Literal['Sing', 'Plur']] = None):
+    if token not in WORD_CLASSES:
+        modifier, element = _split_compound_word(token)
+    else:
+        modifier = ''
+        element = token
+
+    inflected_element = _inflect_nominal_simple_stem(element, case, number, degree, person_psor, number_psor)
+    return modifier + inflected_element
+
+
+def _inflect_nominal_simple_stem(token, case, number, degree, person_psor, number_psor):
     # FIXME: numerals
     
     forms = inflect_word(token, required_wclass='subst')
@@ -667,6 +681,23 @@ def _first_vowel(word):
 
 def is_vowel(c):
     return c.lower() in ['a', 'e', 'i', 'o', 'u', 'y', 'ä', 'ö', 'å']
+
+
+def _split_compound_word(compound_word):
+    """Split a compound word into modifier and element parts.
+
+    Works only on compound words recognized by Voikko.
+    """
+    analyses = voikko.analyze(compound_word)
+    if analyses:
+        analysis = analyses[0]
+        structure = analysis.get('STRUCTURE', '')
+        i = structure.rfind('=')
+        if i != 0 and i != len(structure) - 1:
+            k = i - len(structure) + 1
+            return compound_word[:k], compound_word[k:]
+
+    return '', compound_word
 
 
 # Hot patch to make libvoikko's vocabulary more compatible with voikko-fi 2.4
